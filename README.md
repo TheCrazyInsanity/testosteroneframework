@@ -18,4 +18,4 @@ Unsupported features:
 * Do not show tag (users can view the index.js of webpages, dont put anything secret in there, this is coming eventually but a temporary workaround would be to just load a file from outside of servershit inside of that index.js so people cant view it)
 * idk anything else
 
-This web framework has not had a security audit, and likely never will, i tried some basic shit at it and i dont see any major vulnerabilities, but please dont use this in anything critical (i am not setting a good example of this)
+This web framework has not had a security audit, and likely never will, i tried some basic shit at it and i dont see any vulnerabilities, but please dont use this in anything critical (i am not setting a good example of this)

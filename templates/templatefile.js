@@ -1,5 +1,5 @@
 shittoreturn = null
-var exportshit = function(params){
+var exportshit = function(url, params){
     //Do shit here
 
     //Stop do shit here

@@ -1,9 +1,9 @@
 shittoreturn = null
-const fs = require("fs")
-//Do shit here
-shittoreturn = fs.readFileSync(`${__dirname}/index.html`)
-//Stop doing shit here
-var exportshit = function(){
+var exportshit = function(url, params){
+    const fs = require("fs")
+    //Do shit here
+    shittoreturn = fs.readFileSync(`${__dirname}/index.html`)
+    //Stop doing shit here
     return shittoreturn
 }
 module.exports ={

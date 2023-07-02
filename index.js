@@ -4,9 +4,8 @@ const fs = require('fs')
 const url = require('url');
 
 var phpfpm = new PHPFPM({
-    host: '127.0.0.1',
-    port: 6942,
-    documentRoot: `${__dirname}/servershit`
+    documentRoot: __dirname,
+    sockFile: "/run/php-fpm/php-fpm.sock",
 });
 
 var server = http.createServer((req, res) => {   //create web server
@@ -16,18 +15,13 @@ var server = http.createServer((req, res) => {   //create web server
     console.log(url.parse(req.url, true).query)
     console.log(url.parse(req.url, true))
     forg = req.url
-    if (forg == "/") {
-        forg = ""
-    }
     try {
         var retarded = false
-        console.log("sped ass shit")
-        console.log(`${__dirname}/servershit${url.parse(forg, true).pathname}index.js`)
         if ((fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}`)) && (fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.php`))) { // Execute PHP shit
             console.log("is php")
             phpfpm.run(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.php`, (err, output, php_errors) => {
                 if (err == 99) {
-                    throw(`Internal php fpm error: ${err}`);
+                    console.error(`Internal php fpm error: ${err}`);
                 }
                 res.end(output);
                 if (php_errors) {

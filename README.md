@@ -9,14 +9,17 @@ For actual pages whenever a request is made it first checks if there is a folder
 
 ==Addendum==
 You can place an index.php file instead of index.js, this makes it a php script
+In order to use php, you need to:
+A: Have php-fpm service installed and running
+B: Have php-fpm socket on /run/php-fpm/php-fpm.sock
 
 Supported features:
 * Static pages
 * Dynamic pages
 * Url parameters
+* PHP support, simultaneously with js (this is cursed)
 
 Unsupported features:
-* Post requests
 * i forgor the name of it but like when a new post is made on a forum, it gets its own id, uh you cant do that without actually creating a file for its id, this is never coming
 * Do not show tag (users can view the index.js of webpages, dont put anything secret in there, this is coming eventually but a temporary workaround would be to just load a file from outside of servershit inside of that index.js so people cant view it)
 * idk anything else

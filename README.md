@@ -7,6 +7,9 @@ First edit the 404 page in ./servershit/404.html to your liking
 Then for binary files, simply upload them to servershit, if you want them to be under a subdirectory like example.com/directory/file.png it would be servershit/directory/file.png
 For actual pages whenever a request is made it first checks if there is a folder with the path name with an index.js in it, if so it runs it (example index.js files in the template folder), if not it looks if there is a file in that path, if so it returns it, if not it errors
 
+==Addendum==
+You can place an index.php file instead of index.js, this makes it a php script
+
 Supported features:
 * Static pages
 * Dynamic pages

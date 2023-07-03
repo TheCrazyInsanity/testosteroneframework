@@ -8,7 +8,7 @@ var phpfpm = new PHPFPM({
     sockFile: "/run/php-fpm/php-fpm.sock",
 });
 
-var server = http.createServer((req, res) => {   //create web server
+var server = http.createServer(async function (req, res){   //create web server
     //var retarded = true
     console.log(req.url)
     var method = req.method
@@ -36,9 +36,9 @@ var server = http.createServer((req, res) => {   //create web server
             console.log("is js")
             if (retarded == false) {
                 if (!(url.parse(forg, true).pathname == undefined)) {
-                    res.end(require(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.js`).exportshit(url.parse(forg, true).pathname, url.parse(req.url, true).query))
+                    res.end(await require(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.js`).exportshit(url.parse(forg, true).pathname, url.parse(req.url, true).query, res, req))
                 } else {
-                    res.end(require(`${__dirname}/servershit/index.js`).exportshit(url.parse(forg, true).pathname, url.parse(req.url, true).query))
+                    res.end(await require(`${__dirname}/servershit/index.js`).exportshit(url.parse(forg, true).pathname, url.parse(req.url, true).query), res, req)
                 }
                 var resolve = require('resolve');
             }

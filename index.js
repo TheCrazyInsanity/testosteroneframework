@@ -1,78 +1,104 @@
-var http = require('http'); // Import Node.js core module
-var PHPFPM = require("node-phpfpm");
-const fs = require('fs')
+var http = require('http');
+var path = require('path');
+const fs = require('fs');
 const url = require('url');
+const toml = require('toml');
 
-var phpfpm = new PHPFPM({
-    documentRoot: __dirname,
-    sockFile: "/run/php-fpm/php-fpm.sock",
-});
+function ext2ICON(ext) {
+    switch (ext) {
+        case ".png":
+            return "icons/type_image.png"
+        case ".jpg":
+            return "icons/type_image.png"
+        case ".jpeg":
+            return "icons/type_image.png"
+        case ".php":
+            return "icons/type_php.png"
+        case ".ogg":
+            return "icons/type_audio.png"
+        case ".wav":
+            return "icons/type_audio.png"
+        case ".mp3":
+            return "icons/type_audio.png"
+        case ".flac":
+            return "icons/type_audio.png"
+        default:
+            return "icons/type_text.png"
+    }
+}
+
+function ext2MIME(ext) {
+    switch (ext) {
+        case ".png":
+            return "image/png"
+        case ".jpg":
+            return "image/jpeg"
+        case ".jpeg":
+            return "image/jpeg"
+        case ".avif":
+            return "image/avif"
+        case ".svg":
+            return "image/svg+xml"
+        case ".obj":
+            return "model/obj"
+        case ".css":
+            return "text/css"
+        case ".html":
+            return "text/html"
+        case ".csv":
+            return "text/csv"
+        case ".js":
+            return "text/js"
+        case ".xml":
+            return "text/xml"
+        case ".ogg":
+            return "audio/ogg"
+        case ".mp3":
+            return "audio/mpeg"
+        case ".zip":
+            return "application/zip"
+        case ".json":
+            return "application/json"
+        case ".pdf":
+            return "application/pdf"
+        default:
+            return "text/plain"
+    }
+}
+
+function Handler_JS(req, res) {
+    console.log("blank for now")
+}
+
+var module_filenames = {".js" : Handler_JS}
+
+var conf = toml.parse(fs.readFileSync('ttfw.conf','utf8'));
 
 var server = http.createServer(async function (req, res){   //create web server
-    //var retarded = true
-    console.log(req.url)
-    var method = req.method
-    console.log(url.parse(req.url, true).query)
-    console.log(url.parse(req.url, true))
-    forg = req.url
+    var pathname = url.parse(req.url, true).pathname
     try {
-        var retarded = false
-        if ((fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}`)) && (fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.php`))) { // Execute PHP shit
-            console.log("is php")
-            phpfpm.run(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.php`, (err, output, php_errors) => {
-                if (err == 99) {
-                    console.error(`Internal php fpm error: ${err}`);
-                }
-                res.end(output);
-                if (php_errors) {
-                    console.log(`PHP Has encountered errors:\n${php_errors}`);
-                }
-            });
-        } else if ((fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}`)) && !(fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.js`))) {
-            console.log("is file request")
-            res.end(fs.readFileSync(`${__dirname}/servershit${url.parse(forg, true).pathname}`))
-            retarded = true
-        } else { // Execute regular js shit
-            console.log("is js")
-            if (retarded == false) {
-                if (!(url.parse(forg, true).pathname == undefined)) {
-                    res.end(await require(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.js`).exportshit(url.parse(forg, true).pathname, url.parse(req.url, true).query, res, req))
-                } else {
-                    res.end(await require(`${__dirname}/servershit/index.js`).exportshit(url.parse(forg, true).pathname, url.parse(req.url, true).query), res, req)
-                }
-                var resolve = require('resolve');
-            }
-
-            var path = null
-            if (retarded == false) {
-                if (!(url.parse(forg, true).pathname == undefined)) {
-                    path = resolve.sync(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.js`);
-                } else {
-                    path = resolve.sync(`${__dirname}/servershit/index.js`);
-                }
-
-                console.log("Path to module found:", path);
-
-                if (require.cache[path]) {
-                    delete require.cache[path];
-                }
-            } else {
-                retarded = false
+        if (fs.lstatSync(`${__dirname}/servershit${pathname}`).isFile()) { //itsa file request
+            var extension = path.extname(pathname)
+            res.setHeader("Content-Type", ext2MIME(extension))
+            res.write(fs.readFileSync(`${__dirname}/servershit${pathname}`))
+            res.end()
+        } else if (fs.lstatSync(`${__dirname}/servershit${pathname}`).isDirectory()) {
+            var points = fs.readdirSync(`${__dirname}/servershit${pathname}`).filter(fn => fn.startsWith('index'));
+            if (points.length == 0) { // autoindex time
+                res.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>.pathline,body{font-size:14px}body{font-family:Arial,Helvetica,sans-serif;background:#eee}#page{width:800px;margin:20px auto;background:#fff;padding:25px;border:1px solid #eee}.pathline{border-radius:3px;background:#f3f3f3;padding:7px 10px;margin-bottom:10px;letter-spacing:.5px}.pathline img{width:13px;margin-right:3px}.pathline a{color:#777}.pathline a:hover{color:#333}#dirlist table a{color:#222}#dirlist table{width:100%;text-align:left}#dirlist table th{padding:5px 10px;font-size:15px;cursor:pointer}#dirlist table td{border-bottom:1px solid #eee;vertical-align:middle;font-size:12px}#dirlist table td a{padding:10px 0;display:block;width:500px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font-size:14px}#dirlist table img{vertical-align:middle;width:16px}#dirlist tr:hover td{background:#f9f9f9}#footer{margin-top:10px;text-align:center}#footer address{color:#aaa;font-style:normal;font-size:12px}</style><title>Index</title></head><body><div id="page"><div class="pathline"><a href="/"><img src="/icons/home.png" alt=""></a> ${pathname}</div><div id="dirlist"><table><tr><th valign="top"><img src="/icons/blank.png"></th><th><a>Name</a></th><th><a>Last modified</a></th><th><a>Size</a></th><th><a>Description</a></th></tr><tr><td valign="top"><img src="/icons/back.png" alt="[   ]"></td><td><a href=" ">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>`)
+                fs.readdirSync(`${__dirname}/servershit${pathname}`).forEach(file => {
+                    var filepath = `${__dirname}/servershit${pathname}/${file}`
+                    var metadata = fs.statSync(filepath)
+                    res.write(`<tr><td valign="top"><img src="${(metadata.isFile() == true ? ext2ICON(path.extname(filepath)) : "icons/type_folder2.png")}" alt="[   ]"></td><td><a href="${pathname}/${file}">${file}</a></td><td align="right">${metadata.atime.getUTCFullYear()}-${metadata.atime.getUTCMonth()}-${metadata.atime.getUTCDay()} ${metadata.atime.getUTCHours()}:${metadata.atime.getUTCMinutes()}</td><td align="right">${(metadata.isFile() == true ? metadata.size : "-")}</td><td>&nbsp;</td></tr>`);
+                })
+                res.end();
             }
         }
     } catch (e) {
-        console.log("Somebody went to a wrong page, or maybe they fucking broke something lmfao")
-        console.log(JSON.stringify(e))
-        if (JSON.stringify(e).includes('MODULE_NOT_FOUND')) {
-            res.writeHead(200)
-            res.end(fs.readFileSync(`${__dirname}/servershit/404.html`))
-        } else {
-            res.end(`Welcome to my terrible error page, I dont want to make proper error pages so figure out the error yourself, if you are sure this page is real please send me the following error code (or if you have a slight clue on what you are doing figure it out yourself):
-    ${e}`)
-        }
+
     }
 });
 
-server.listen(80); //6 - listen for any incoming requests
+server.listen(conf.port); //6 - listen for any incoming requests
 
 console.log(`Testosterone framework goin' up`)

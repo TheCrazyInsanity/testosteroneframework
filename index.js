@@ -1,4 +1,5 @@
 var http = require('http');
+var https = require('https');
 var path = require('path');
 const fs = require('fs');
 const url = require('url');
@@ -67,17 +68,17 @@ function ext2MIME(ext) {
     }
 }
 
-var conf = toml.parse(fs.readFileSync('ttfw.conf','utf8'));
+var conf = toml.parse(fs.readFileSync('ttfw.toml','utf8'));
 
 function Handler_JS(req, res, params, urlpath, module_filepath) {
     var module = require(module_filepath)
     var response = module.exportshit(urlpath, params, res, req)
-    res.end(response)
+    return response
 }
 
 var module_filenames = {".js" : Handler_JS}
 
-var server = http.createServer(async function (req, res){ 
+async function processrq(req, res){ 
     var pathname = url.parse(req.url, true).pathname
     var params = url.parse(req.url, true).query
     try {
@@ -89,7 +90,7 @@ var server = http.createServer(async function (req, res){
         } else if (fs.lstatSync(`${__dirname}/servershit${pathname}`).isDirectory()) {
             var points = fs.readdirSync(`${__dirname}/servershit${pathname}`).filter(fn => fn.startsWith('index'));
             if (points.length == 0 && conf.autoindex == true) { // autoindex time
-                res.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>.pathline,body{font-size:14px}body{font-family:Arial,Helvetica,sans-serif;background:#eee}#page{width:800px;margin:20px auto;background:#fff;padding:25px;border:1px solid #eee}.pathline{border-radius:3px;background:#f3f3f3;padding:7px 10px;margin-bottom:10px;letter-spacing:.5px}.pathline img{width:13px;margin-right:3px}.pathline a{color:#777}.pathline a:hover{color:#333}#dirlist table a{color:#222}#dirlist table{width:100%;text-align:left}#dirlist table th{padding:5px 10px;font-size:15px;cursor:pointer}#dirlist table td{border-bottom:1px solid #eee;vertical-align:middle;font-size:12px}#dirlist table td a{padding:10px 0;display:block;width:500px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font-size:14px}#dirlist table img{vertical-align:middle;width:16px}#dirlist tr:hover td{background:#f9f9f9}#footer{margin-top:10px;text-align:center}#footer address{color:#aaa;font-style:normal;font-size:12px}</style><title>Index</title></head><body><div id="page"><div class="pathline"><a href="/"><img src="/icons/home.png" alt=""></a> ${pathname}</div><div id="dirlist"><table><tr><th valign="top"><img src="/icons/blank.png"></th><th><a>Name</a></th><th><a>Last modified</a></th><th><a>Size</a></th><th><a>Description</a></th></tr><tr><td valign="top"><img src="/icons/back.png" alt="[   ]"></td><td><a href=" ">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>`)
+                res.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>.pathline,body{font-size:14px}body{font-family:Arial,Helvetica,sans-serif;background:#eee}#page{width:800px;margin:20px auto;background:#fff;padding:25px;border:1px solid #eee}.pathline{border-radius:3px;background:#f3f3f3;padding:7px 10px;margin-bottom:10px;letter-spacing:.5px}.pathline img{width:13px;margin-right:3px}.pathline a{color:#777}.pathline a:hover{color:#333}#dirlist table a{color:#222}#dirlist table{width:100%;text-align:left}#dirlist table th{padding:5px 10px;font-size:15px;cursor:pointer}#dirlist table td{border-bottom:1px solid #eee;vertical-align:middle;font-size:12px}#dirlist table td a{padding:10px 0;display:block;width:500px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font-size:14px}#dirlist table img{vertical-align:middle;width:16px}#dirlist tr:hover td{background:#f9f9f9}#footer{margin-top:10px;text-align:center}#footer address{color:#aaa;font-style:normal;font-size:12px}</style><title>Index of ${pathname}</title></head><body><div id="page"><div class="pathline"><a href="/"><img src="/icons/home.png" alt=""></a> ${pathname}</div><div id="dirlist"><table><tr><th valign="top"><img src="/icons/blank.png"></th><th><a>Name</a></th><th><a>Last modified</a></th><th><a>Size</a></th><th><a>Description</a></th></tr><tr><td valign="top"><img src="/icons/back.png" alt="[   ]"></td><td><a href=" ">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>`)
                 fs.readdirSync(`${__dirname}/servershit${pathname}`).forEach(file => {
                     var filepath = `${__dirname}/servershit${pathname}/${file}`
                     var metadata = fs.statSync(filepath)
@@ -100,7 +101,8 @@ var server = http.createServer(async function (req, res){
                 for (let entp of points) {
                     if (module_filenames[path.extname(entp)] != undefined) {
                         var lang_module = module_filenames[path.extname(entp)]
-                        lang_module(req ,res, params, pathname, `${__dirname}/servershit${pathname}${entp}`)
+                        var re = lang_module(req ,res, params, pathname, `${__dirname}/servershit${pathname}${entp}`)
+                        res.end(re)
                     }
                 }
             }
@@ -108,9 +110,20 @@ var server = http.createServer(async function (req, res){
     } catch (e) {
 
     }
-});
+}
+
+var server_http = http.createServer(processrq);
+var server_https;
 
 console.log(`Testosterone framework goin' up`)
-server.listen(conf.port);
+server_http.listen(conf.http.port);
 console.log("Listening to http at " + conf.http.port)
-
+if (conf.https.enabled == true) {
+    const options = {
+        key: fs.readFileSync(conf.https.key),
+        cert: fs.readFileSync(conf.https.certificate),
+    };
+    server_https = https.createServer(options, processrq);
+    console.log("Listening to https at " + conf.https.port)
+    server_https.listen(conf.https.port)
+}

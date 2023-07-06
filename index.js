@@ -77,11 +77,11 @@ function Handler_JS(req, res, params, urlpath, module_filepath) {
 
 var module_filenames = {".js" : Handler_JS}
 
-var server = http.createServer(async function (req, res){   //create web server
+var server = http.createServer(async function (req, res){ 
     var pathname = url.parse(req.url, true).pathname
     var params = url.parse(req.url, true).query
     try {
-        if (fs.lstatSync(`${__dirname}/servershit${pathname}`).isFile()) { //itsa file request
+        if (fs.lstatSync(`${__dirname}/servershit${pathname}`).isFile()) { 
             var extension = path.extname(pathname)
             res.setHeader("Content-Type", ext2MIME(extension))
             res.write(fs.readFileSync(`${__dirname}/servershit${pathname}`))
@@ -111,6 +111,6 @@ var server = http.createServer(async function (req, res){   //create web server
 });
 
 console.log(`Testosterone framework goin' up`)
-server.listen(conf.port); //6 - listen for any incoming requests
-console.log("Listening to http at " + conf.port)
+server.listen(conf.port);
+console.log("Listening to http at " + conf.http.port)
 

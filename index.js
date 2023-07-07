@@ -24,6 +24,72 @@ function ext2ICON(ext) {
             return "/icons/type_audio.png"
         case ".flac":
             return "/icons/type_audio.png"
+	    case ".php":
+            return "/icons/type_php.png"
+        case ".exe":
+            return "/icons/application.png"
+        case ".gz":
+            return "/icons/type_zip.png"
+        case ".ai":
+            return "/icons/type_illustrator.png"
+        case ".eps":
+            return "/icons/type_illustrator.png"
+        case ".as":
+            return "/icons/type_code.png"
+        case ".c":
+            return "/icons/type_code.png"
+        case ".ps":
+            return "/icons/type_photoshop.png"
+        case ".swf":
+            return "/icons/type_flash.png"
+        case ".tar":
+            return "/icons/type_zip.png"
+        case ".zip":
+            return "/icons/type_zip.png"
+        case ".tgz":
+            return "/icons/type_zip.png"
+        case ".Z":
+            return "/icons/type_zip.png"
+        case ".for":
+            return "/icons/type_code.png"
+        case ".gif":
+            return "/icons/type_image.png"
+        case ".py":
+            return "/icons/type_code.png"
+        case ".pl":
+            return "/icons/type_code.png"
+        case ".mp4":
+            return "/icons/type_video.png"
+        case ".txt":
+            return "/icons/type_text.png"
+        case ".mid":
+            return "/icons/type_audio.png"
+        case ".midi":
+            return "/icons/type_audio.png"
+        case ".pdf":
+            return "/icons/type_pdf.png"
+        case ".ppt":
+            return "/icons/type_powerpoint.png"
+        case ".xls":
+            return "/icons/type_excel.png"
+        case ".doc":
+            return "/icons/type_word.png"
+        case ".sh":
+            return "/icons/type_code.png"
+        case ".html":
+            return "/icons/type_code.png"
+        case ".htm":
+            return "/icons/type_code.png"
+        case ".shtml":
+            return "/icons/type_code.png"
+        case ".csh":
+            return "/icons/type_code.png"
+        case ".ksh":
+            return "/icons/type_code.png"
+        case ".tcl":
+            return "/icons/type_code.png"
+        case ".mov":
+            return "/icons/type_video.png"
         default:
             return "/icons/type_binary.png"
     }
@@ -90,7 +156,7 @@ async function processrq(req, res){
         } else if (fs.lstatSync(`${__dirname}/servershit${pathname}`).isDirectory()) {
             var points = fs.readdirSync(`${__dirname}/servershit${pathname}`).filter(fn => fn.startsWith('index'));
             if (points.length == 0 && conf.autoindex == true) { // autoindex time
-                res.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>.pathline,body{font-size:14px}body{font-family:Arial,Helvetica,sans-serif;background:#eee}#page{width:800px;margin:20px auto;background:#fff;padding:25px;border:1px solid #eee}.pathline{border-radius:3px;background:#f3f3f3;padding:7px 10px;margin-bottom:10px;letter-spacing:.5px}.pathline img{width:13px;margin-right:3px}.pathline a{color:#777}.pathline a:hover{color:#333}#dirlist table a{color:#222}#dirlist table{width:100%;text-align:left}#dirlist table th{padding:5px 10px;font-size:15px;cursor:pointer}#dirlist table td{border-bottom:1px solid #eee;vertical-align:middle;font-size:12px}#dirlist table td a{padding:10px 0;display:block;width:500px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font-size:14px}#dirlist table img{vertical-align:middle;width:16px}#dirlist tr:hover td{background:#f9f9f9}#footer{margin-top:10px;text-align:center}#footer address{color:#aaa;font-style:normal;font-size:12px}</style><title>Index of ${pathname}</title></head><body><div id="page"><div class="pathline"><a href="/"><img src="/icons/home.png" alt=""></a> ${pathname}</div><div id="dirlist"><table><tr><th valign="top"><img src="/icons/blank.png"></th><th><a>Name</a></th><th><a>Last modified</a></th><th><a>Size</a></th><th><a>Description</a></th></tr><tr><td valign="top"><img src="/icons/back.png" alt="[   ]"></td><td><a href=" ">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>`)
+                res.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>.pathline,body{font-size:14px}body{font-family:Arial,Helvetica,sans-serif;background:#eee}#page{width:800px;margin:20px auto;background:#fff;padding:25px;border:1px solid #eee}.pathline{border-radius:3px;background:#f3f3f3;padding:7px 5px;margin-bottom:10px;letter-spacing:.5px}.pathline img{width:13px;margin-right:3px}.pathline a{color:#777}.pathline a:hover{color:#333}#dirlist table a{color:#222}#dirlist table{width:100%;text-align:left}#dirlist table th{padding:5px 10px;font-size:15px;cursor:pointer}#dirlist table td{border-bottom:1px solid #eee;vertical-align:middle;font-size:12px}#dirlist table td a{padding:5px 0;display:block;width:500px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font-size:14px}#dirlist table img{vertical-align:middle;width:16px}#dirlist tr:hover td{background:#f9f9f9}#footer{margin-top:10px;text-align:center}#footer address{color:#aaa;font-style:normal;font-size:12px}</style><title>Index of ${pathname}</title></head><body><div id="page"><div class="pathline"><a href="/"><img src="/icons/home.png" alt=""></a> ${pathname}</div><div id="dirlist"><table><tr><th valign="top"><img src="/icons/blank.png"></th><th><a>Name</a></th><th><a>Last modified</a></th><th><a>Size</a></th><th><a>Description</a></th></tr><tr><td valign="top"><img src="/icons/back.png" alt="[   ]"></td><td><a href=" ">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>`)
                 fs.readdirSync(`${__dirname}/servershit${pathname}`).forEach(file => {
                     var filepath = `${__dirname}/servershit${pathname}/${file}`
                     var metadata = fs.statSync(filepath)
@@ -127,3 +193,4 @@ if (conf.https.enabled == true) {
     console.log("Listening to https at " + conf.https.port)
     server_https.listen(conf.https.port)
 }
+

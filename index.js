@@ -1,78 +1,196 @@
-var http = require('http'); // Import Node.js core module
-var PHPFPM = require("node-phpfpm");
-const fs = require('fs')
+var http = require('http');
+var https = require('https');
+var path = require('path');
+const fs = require('fs');
 const url = require('url');
+const toml = require('toml');
+const { equal } = require('assert');
 
-var phpfpm = new PHPFPM({
-    documentRoot: __dirname,
-    sockFile: "/run/php-fpm/php-fpm.sock",
-});
+function ext2ICON(ext) {
+    switch (ext) {
+        case ".png":
+            return "/icons/type_image.png"
+        case ".jpg":
+            return "/cons/type_image.png"
+        case ".jpeg":
+            return "/icons/type_image.png"
+        case ".php":
+            return "/icons/type_php.png"
+        case ".ogg":
+            return "/icons/type_audio.png"
+        case ".wav":
+            return "/icons/type_audio.png"
+        case ".mp3":
+            return "/icons/type_audio.png"
+        case ".flac":
+            return "/icons/type_audio.png"
+	    case ".php":
+            return "/icons/type_php.png"
+        case ".exe":
+            return "/icons/application.png"
+        case ".gz":
+            return "/icons/type_zip.png"
+        case ".ai":
+            return "/icons/type_illustrator.png"
+        case ".eps":
+            return "/icons/type_illustrator.png"
+        case ".as":
+            return "/icons/type_code.png"
+        case ".c":
+            return "/icons/type_code.png"
+        case ".ps":
+            return "/icons/type_photoshop.png"
+        case ".swf":
+            return "/icons/type_flash.png"
+        case ".tar":
+            return "/icons/type_zip.png"
+        case ".zip":
+            return "/icons/type_zip.png"
+        case ".tgz":
+            return "/icons/type_zip.png"
+        case ".Z":
+            return "/icons/type_zip.png"
+        case ".for":
+            return "/icons/type_code.png"
+        case ".gif":
+            return "/icons/type_image.png"
+        case ".py":
+            return "/icons/type_code.png"
+        case ".pl":
+            return "/icons/type_code.png"
+        case ".mp4":
+            return "/icons/type_video.png"
+        case ".txt":
+            return "/icons/type_text.png"
+        case ".mid":
+            return "/icons/type_audio.png"
+        case ".midi":
+            return "/icons/type_audio.png"
+        case ".pdf":
+            return "/icons/type_pdf.png"
+        case ".ppt":
+            return "/icons/type_powerpoint.png"
+        case ".xls":
+            return "/icons/type_excel.png"
+        case ".doc":
+            return "/icons/type_word.png"
+        case ".sh":
+            return "/icons/type_code.png"
+        case ".html":
+            return "/icons/type_code.png"
+        case ".htm":
+            return "/icons/type_code.png"
+        case ".shtml":
+            return "/icons/type_code.png"
+        case ".csh":
+            return "/icons/type_code.png"
+        case ".ksh":
+            return "/icons/type_code.png"
+        case ".tcl":
+            return "/icons/type_code.png"
+        case ".mov":
+            return "/icons/type_video.png"
+        default:
+            return "/icons/type_binary.png"
+    }
+}
 
-var server = http.createServer(async function (req, res){   //create web server
-    //var retarded = true
-    console.log(req.url)
-    var method = req.method
-    console.log(url.parse(req.url, true).query)
-    console.log(url.parse(req.url, true))
-    forg = req.url
+function ext2MIME(ext) {
+    switch (ext) {
+        case ".png":
+            return "image/png"
+        case ".jpg":
+            return "image/jpeg"
+        case ".jpeg":
+            return "image/jpeg"
+        case ".avif":
+            return "image/avif"
+        case ".svg":
+            return "image/svg+xml"
+        case ".obj":
+            return "model/obj"
+        case ".css":
+            return "text/css"
+        case ".html":
+            return "text/html"
+        case ".csv":
+            return "text/csv"
+        case ".js":
+            return "text/js"
+        case ".xml":
+            return "text/xml"
+        case ".ogg":
+            return "audio/ogg"
+        case ".mp3":
+            return "audio/mpeg"
+        case ".zip":
+            return "application/zip"
+        case ".json":
+            return "application/json"
+        case ".pdf":
+            return "application/pdf"
+        default:
+            return "text/plain"
+    }
+}
+
+var conf = toml.parse(fs.readFileSync('ttfw.toml','utf8'));
+
+function Handler_JS(req, res, params, urlpath, module_filepath) {
+    var module = require(module_filepath)
+    var response = module.exportshit(urlpath, params, res, req)
+    return response
+}
+
+var module_filenames = {".js" : Handler_JS}
+
+async function processrq(req, res){ 
+    var pathname = url.parse(req.url, true).pathname
+    var params = url.parse(req.url, true).query
     try {
-        var retarded = false
-        if ((fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}`)) && (fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.php`))) { // Execute PHP shit
-            console.log("is php")
-            phpfpm.run(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.php`, (err, output, php_errors) => {
-                if (err == 99) {
-                    console.error(`Internal php fpm error: ${err}`);
-                }
-                res.end(output);
-                if (php_errors) {
-                    console.log(`PHP Has encountered errors:\n${php_errors}`);
-                }
-            });
-        } else if ((fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}`)) && !(fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.js`))) {
-            console.log("is file request")
-            res.end(fs.readFileSync(`${__dirname}/servershit${url.parse(forg, true).pathname}`))
-            retarded = true
-        } else { // Execute regular js shit
-            console.log("is js")
-            if (retarded == false) {
-                if (!(url.parse(forg, true).pathname == undefined)) {
-                    res.end(await require(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.js`).exportshit(url.parse(forg, true).pathname, url.parse(req.url, true).query, res, req))
-                } else {
-                    res.end(await require(`${__dirname}/servershit/index.js`).exportshit(url.parse(forg, true).pathname, url.parse(req.url, true).query), res, req)
-                }
-                var resolve = require('resolve');
-            }
-
-            var path = null
-            if (retarded == false) {
-                if (!(url.parse(forg, true).pathname == undefined)) {
-                    path = resolve.sync(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.js`);
-                } else {
-                    path = resolve.sync(`${__dirname}/servershit/index.js`);
-                }
-
-                console.log("Path to module found:", path);
-
-                if (require.cache[path]) {
-                    delete require.cache[path];
-                }
+        if (fs.lstatSync(`${__dirname}/servershit${pathname}`).isFile()) { 
+            var extension = path.extname(pathname)
+            res.setHeader("Content-Type", ext2MIME(extension))
+            res.write(fs.readFileSync(`${__dirname}/servershit${pathname}`))
+            res.end()
+        } else if (fs.lstatSync(`${__dirname}/servershit${pathname}`).isDirectory()) {
+            var points = fs.readdirSync(`${__dirname}/servershit${pathname}`).filter(fn => fn.startsWith('index'));
+            if (points.length == 0 && conf.autoindex == true) { // autoindex time
+                res.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>.pathline,body{font-size:14px}body{font-family:Arial,Helvetica,sans-serif;background:#eee}#page{width:800px;margin:20px auto;background:#fff;padding:25px;border:1px solid #eee}.pathline{border-radius:3px;background:#f3f3f3;padding:7px 5px;margin-bottom:10px;letter-spacing:.5px}.pathline img{width:13px;margin-right:3px}.pathline a{color:#777}.pathline a:hover{color:#333}#dirlist table a{color:#222}#dirlist table{width:100%;text-align:left}#dirlist table th{padding:5px 10px;font-size:15px;cursor:pointer}#dirlist table td{border-bottom:1px solid #eee;vertical-align:middle;font-size:12px}#dirlist table td a{padding:5px 0;display:block;width:500px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font-size:14px}#dirlist table img{vertical-align:middle;width:16px}#dirlist tr:hover td{background:#f9f9f9}#footer{margin-top:10px;text-align:center}#footer address{color:#aaa;font-style:normal;font-size:12px}</style><title>Index of ${pathname}</title></head><body><div id="page"><div class="pathline"><a href="/"><img src="/icons/home.png" alt=""></a> ${pathname}</div><div id="dirlist"><table><tr><th valign="top"><img src="/icons/blank.png"></th><th><a>Name</a></th><th><a>Last modified</a></th><th><a>Size</a></th><th><a>Description</a></th></tr><tr><td valign="top"><img src="/icons/back.png" alt="[   ]"></td><td><a href=" ">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>`)
+                fs.readdirSync(`${__dirname}/servershit${pathname}`).forEach(file => {
+                    var filepath = `${__dirname}/servershit${pathname}/${file}`
+                    var metadata = fs.statSync(filepath)
+                    res.write(`<tr><td valign="top"><img src="${(metadata.isFile() == true ? ext2ICON(path.extname(filepath)) : "/icons/type_folder2.png")}" alt="[   ]"></td><td><a href="${pathname}/${file}">${file}</a></td><td align="right">${metadata.atime.getUTCFullYear()}-${metadata.atime.getUTCMonth()}-${metadata.atime.getUTCDay()} ${metadata.atime.getUTCHours()}:${metadata.atime.getUTCMinutes()}</td><td align="right">${(metadata.isFile() == true ? metadata.size : "-")}</td><td>&nbsp;</td></tr>`);
+                })
+                res.end();
             } else {
-                retarded = false
+                for (let entp of points) {
+                    if (module_filenames[path.extname(entp)] != undefined) {
+                        var lang_module = module_filenames[path.extname(entp)]
+                        var re = lang_module(req ,res, params, pathname, `${__dirname}/servershit${pathname}${entp}`)
+                        res.end(re)
+                    }
+                }
             }
         }
     } catch (e) {
-        console.log("Somebody went to a wrong page, or maybe they fucking broke something lmfao")
-        console.log(JSON.stringify(e))
-        if (JSON.stringify(e).includes('MODULE_NOT_FOUND')) {
-            res.writeHead(200)
-            res.end(fs.readFileSync(`${__dirname}/servershit/404.html`))
-        } else {
-            res.end(`Welcome to my terrible error page, I dont want to make proper error pages so figure out the error yourself, if you are sure this page is real please send me the following error code (or if you have a slight clue on what you are doing figure it out yourself):
-    ${e}`)
-        }
-    }
-});
 
-server.listen(80); //6 - listen for any incoming requests
+    }
+}
+
+var server_http = http.createServer(processrq);
+var server_https;
 
 console.log(`Testosterone framework goin' up`)
+server_http.listen(conf.http.port);
+console.log("Listening to http at " + conf.http.port)
+if (conf.https.enabled == true) {
+    const options = {
+        key: fs.readFileSync(conf.https.key),
+        cert: fs.readFileSync(conf.https.certificate),
+    };
+    server_https = https.createServer(options, processrq);
+    console.log("Listening to https at " + conf.https.port)
+    server_https.listen(conf.https.port)
+}
+

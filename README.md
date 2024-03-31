@@ -22,6 +22,9 @@ Supported features:
 Unsupported features:
 * i forgor the name of it but like when a new post is made on a forum, it gets its own id, uh you cant do that without actually creating a file for its id, this is never coming
 * Do not show tag (users can view the index.js of webpages, dont put anything secret in there, this is coming eventually but a temporary workaround would be to just load a file from outside of servershit inside of that index.js so people cant view it)
+* The root page can only be an index.js, this isnt a technical limitation or anything but this code is a fucking mess and that makes it worse, no workers or php there i guess (if it really matters that much you can just make it a redirect to /home or something)
 * idk anything else
 
 This web framework has not had a security audit, and likely never will, i tried some basic shit at it and i dont see any vulnerabilities, but please dont use this in anything critical (i am not setting a good example of this)
+
+i hate this project so fucking much why did i do this to myself

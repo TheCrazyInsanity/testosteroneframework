@@ -2,6 +2,7 @@ var http = require('http'); // Import Node.js core module
 var PHPFPM = require("node-phpfpm");
 const fs = require('fs')
 const url = require('url');
+const { Worker } = require('worker_threads')
 
 var phpfpm = new PHPFPM({
     documentRoot: __dirname,
@@ -28,6 +29,24 @@ var server = http.createServer(async function (req, res){   //create web server
                     console.log(`PHP Has encountered errors:\n${php_errors}`);
                 }
             });
+        } else if((fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}`)) && (fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}/windex.js`))){
+            function runService(workerData) {
+                return new Promise((resolve, reject) => {
+                  const worker = new Worker(`${__dirname}/servershit${url.parse(forg, true).pathname}/windex.js`, { workerData });
+                  worker.on('message', resolve);
+                  worker.on('error', reject);
+                  worker.on('exit', (code) => {
+                    if (code !== 0)
+                      reject(new Error(`Worker stopped with exit code ${code}`));
+                  })
+                })
+              }
+              async function run(data) {
+                var datajson = JSON.stringify(data)
+                const result = await runService(datajson)
+                res.end(result)
+              }
+              run([url.parse(forg, true).pathname, url.parse(req.url, true).query, req.headers, req.method]).catch(err => console.error(err))
         } else if ((fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}`)) && !(fs.existsSync(`${__dirname}/servershit${url.parse(forg, true).pathname}/index.js`))) {
             console.log("is file request")
             res.end(fs.readFileSync(`${__dirname}/servershit${url.parse(forg, true).pathname}`))

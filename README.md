@@ -28,3 +28,4 @@ Unsupported features:
 This web framework has not had a security audit, and likely never will, i tried some basic shit at it and i dont see any vulnerabilities, but please dont use this in anything critical (i am not setting a good example of this)
 
 i hate this project so fucking much why did i do this to myself
+yknow the name of this is so fucking ironic now
